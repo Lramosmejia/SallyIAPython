@@ -6,35 +6,53 @@
     <title>Log mensajes</title>
 
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
         table {
             width: 80%;
             border-collapse: collapse;
             margin: 20px auto;
         }
+
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
-        th{
+
+        th {
             background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
-    <h2>Esta es una muestra de Flask</h2>
+
+    <h2>Registro de mensajes</h2>
 
     <table>
         <tr>
             <th>Fecha y hora</th>
             <th>Mensaje</th>
         </tr>
-        {% for registro in registros %}
-        <tr>
-            <td>{{ registro.fecha_y_hora }}</td>
-            <td>{{ registro.texto }}</td>
-        </tr>
-        {% endfor %}
+
+        {% if registros %}
+            {% for registro in registros %}
+            <tr>
+                <td>
+                    {{ registro.fecha_y_hora.strftime('%Y-%m-%d %H:%M:%S') if registro.fecha_y_hora else '' }}
+                </td>
+                <td>{{ registro.texto }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="2">No hay mensajes aún</td>
+            </tr>
+        {% endif %}
     </table>
+
 </body>
 </html>
