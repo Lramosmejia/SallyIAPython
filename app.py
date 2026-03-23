@@ -1,8 +1,7 @@
 from datetime import datetime, timezone
-from flask import Flask, render_template 
+from flask import Flask, jsonify, request, render_template 
 # importamos flask sqlalchemy para el manejo de la bd
 from flask_sqlalchemy import SQLAlchemy
-import json
 
 app = Flask(__name__)
 
@@ -22,13 +21,6 @@ class Log (db.Model):
 with app.app_context():
     db.create_all()
     
-    prueba1 = Log(texto = "mensaje de prueba 1")
-    prueba2 = Log(texto = "mensaje de prueba 2")
-    
-    db.session.add(prueba1)
-    db.session.add(prueba2)
-    db.session.commit()
-
 #orden de los registros por fecha y hora 
 def orden_por_fecha_y_hora(registros):
     return sorted(registros, key=lambda x: x.fecha_y_hora, reverse=True)
@@ -51,6 +43,33 @@ def agregar_mensajes_log(texto):
     db.session.add(nuevo_registro)
     db.session.commit()
     
+# token de verificacion para la configuracion 
+TOKEN_SALLY = 'SALLY'
 
+@app.route('/webhook', methods=['GET', 'POST'])
+def webhook():
+    if request.method == 'GET':
+        challenge = verificar_token(request)
+        return challenge
+    elif request.method == 'POST':
+        response = recibir_mensajes(request)
+        return response
+        
+def verificar_token(req): 
+    token = req.args.get('hub.verify_token')
+    challenge = req.args.get('hub.verify_cahllenge')
+    
+    if challenge and token == TOKEN_SALLY:
+        return challenge
+    else:
+        return jsonify ({'error : token inválido'}), 401
+
+
+def recibir_mensajes(req):
+    req = request.get_json()
+    agregar_mensajes_log(req)
+    
+    return jsonify({'message': 'EVENT_RECEIVED'})
+    
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=80,debug=True) 
+    app.run(host='0.0.0.0',port=80,debug=True)
