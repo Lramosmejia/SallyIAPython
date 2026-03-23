@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, Response
 from flask_sqlalchemy import SQLAlchemy
 import os
 
@@ -33,26 +33,28 @@ def index():
 # Token
 TOKEN_SALLY = 'SALLY'
 
-
+#WEBHOOK 
 @app.route('/webhook', methods=['GET', 'POST'])
 def webhook():
-    if request.method == 'GET':
-        token = request.args.get('hub.verify_token')
-        challenge = request.args.get('hub.verify_challenge')
 
-        
-        if token and token.strip() == TOKEN_SALLY:
-            return challenge, 200
+    if request.method == 'GET':
+        mode = request.args.get('hub.mode')
+        token = request.args.get('hub.verify_token')
+        challenge = request.args.get('hub.challenge')
+
+        # VALIDACIÓN DE META
+        if mode == 'subscribe' and token and token.strip() == TOKEN_SALLY:
+            return Response(challenge, status=200, mimetype='text/plain')
         else:
-            return 'Token inválido', 403
+            return Response('Forbidden', status=403, mimetype='text/plain')
 
     elif request.method == 'POST':
         data = request.get_json()
 
-        
+        # Guardar mensajes en BD
         agregar_mensajes_log(str(data))
 
-        return 'EVENT_RECEIVED', 200
+        return Response('EVENT_RECEIVED', status=200)
 
 # Guardar mensajes
 def agregar_mensajes_log(texto):
@@ -60,7 +62,7 @@ def agregar_mensajes_log(texto):
     db.session.add(nuevo_registro)
     db.session.commit()
 
-
+#CONFIGURACIÓN PARA RENDER
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  
+    port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
