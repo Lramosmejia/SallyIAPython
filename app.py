@@ -1,17 +1,22 @@
 from datetime import datetime, timezone
 from flask import Flask, request, render_template, Response
 from flask_sqlalchemy import SQLAlchemy
+import requests 
 import os
 
 app = Flask(__name__)
 
-# Base de datos
+# =========================
+# CONFIGURACIÓN BASE DE DATOS
+# =========================
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///metapython.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Modelo
+# =========================
+# MODELO
+# =========================
 class Log(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fecha_y_hora = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -20,23 +25,42 @@ class Log(db.Model):
 with app.app_context():
     db.create_all()
 
-# Ordenar registros
+# =========================
+# FUNCIONES AUXILIARES
+# =========================
 def orden_por_fecha_y_hora(registros):
     return sorted(registros, key=lambda x: x.fecha_y_hora, reverse=True)
 
+
+def agregar_mensajes_log(texto):
+    nuevo_registro = Log(texto=texto)
+    db.session.add(nuevo_registro)
+    db.session.commit()
+
+
+# =========================
+# CONFIGURACIÓN TOKEN
+# =========================
+TOKEN_SALLY = 'SALLY'
+
+
+# =========================
+# RUTA PRINCIPAL
+# =========================
 @app.route('/')
 def index():
     registros = Log.query.all()
     registros_ordenados = orden_por_fecha_y_hora(registros)
     return render_template('index.html', registros=registros_ordenados)
 
-# Token
-TOKEN_SALLY = 'SALLY'
 
-#WEBHOOK 
+# =========================
+# WEBHOOK
+# =========================
 @app.route('/webhook', methods=['GET', 'POST'])
 def webhook():
 
+    # VERIFICACIÓN META
     if request.method == 'GET':
         mode = request.args.get('hub.mode')
         token = request.args.get('hub.verify_token')
@@ -47,6 +71,7 @@ def webhook():
         else:
             return Response('Forbidden', status=403, mimetype='text/plain')
 
+    # RECEPCIÓN DE MENSAJES
     elif request.method == 'POST':
         data = request.get_json()
 
@@ -56,19 +81,60 @@ def webhook():
 
             agregar_mensajes_log(f"{numero}: {mensaje}")
 
+            #  RESPUESTA AUTOMÁTICA
+            enviar_mensajes_whatsapp(numero, mensaje)
+
         except Exception as e:
             print("Error procesando mensaje:", e)
 
         return Response('EVENT_RECEIVED', status=200)
 
 
-# Guardar mensajes
-def agregar_mensajes_log(texto):
-    nuevo_registro = Log(texto=texto)
-    db.session.add(nuevo_registro)
-    db.session.commit()
+# =========================
+# FUNCIÓN ENVIAR MENSAJES
+# =========================
+def enviar_mensajes_whatsapp(numero, mensaje_recibido):
 
-#CONFIGURACIÓN PARA RENDER
+    # 🔹 Lógica de respuesta
+    if "hola" in mensaje_recibido.lower():
+        respuesta = "¡Hola! mi nombre es Sally, soy tu chatbot universitario, ¿en qué puedo ayudarte?"
+    else:
+        respuesta = "No entendí tu mensaje, pero puedo ayudarte"
+
+    # CONFIGURACIÓN (puedes ocultar luego)
+    ACCESS_TOKEN = "EAAfOFtLFLgABRPXgZAwTi1fl3RvtCJHWX4RMQQQe24c0Rm7ghuAw2ZAh6VRZB8fN4jyWAuMgvZAvr8TpacZAlR20DzSSp9tOfBSF6T6RkO1ZAwOGJ2cVq6mLzXQDkU1cXNFyKU3UWxn3EI7JEDa8VZC0L6grghc3MvViHt7CkRkkjD1XhWqxt6qzHWBds2yNwjzpZC1a3ZC4ZCxZAmZAv0y5qzvw3whjZArRpZAJ45vZAaBwKbBItUWaZApOkv3SvHv66wrql6dVZBwuZB00arfgI5f8dcMCDGZAcTi"
+    PHONE_NUMBER_ID = "997842246750668"
+
+    
+    url = f"https://graph.facebook.com/v22.0/{PHONE_NUMBER_ID}/messages"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {ACCESS_TOKEN}"
+    }
+
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "text",
+        "text": {
+            "preview_url": False,
+            "body": respuesta
+        }
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        print("Respuesta Meta:", response.status_code, response.text)
+
+    except Exception as e:
+        print("Error enviando mensaje:", e)
+
+
+# =========================
+# CONFIGURACIÓN RENDER
+# =========================
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
