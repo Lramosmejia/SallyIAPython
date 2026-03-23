@@ -59,10 +59,10 @@ def verificar_token(req):
     token = req.args.get('hub.verify_token')
     challenge = req.args.get('hub.verify_challenge')
     
-    if challenge and token == TOKEN_SALLY:
-        return challenge
+    if token == TOKEN_SALLY:
+        return challenge, 200
     else:
-        return jsonify ({'error' : 'token inválido'}), 401
+        return 'token invalido', 403
 
 
 def recibir_mensajes(req):
