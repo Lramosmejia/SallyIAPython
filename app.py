@@ -14,7 +14,7 @@ db = SQLAlchemy(app)
 #modelo de una tabla para la base de datos
 class Log (db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    fecha_y_hora = db.Column(db.DateTime,default = datetime.now(timezone.utc))
+    fecha_y_hora = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     texto = db.Column(db.TEXT)
 
 #create table
@@ -57,12 +57,12 @@ def webhook():
         
 def verificar_token(req): 
     token = req.args.get('hub.verify_token')
-    challenge = req.args.get('hub.verify_cahllenge')
+    challenge = req.args.get('hub.verify_challenge')
     
     if challenge and token == TOKEN_SALLY:
         return challenge
     else:
-        return jsonify ({'error : token inválido'}), 401
+        return jsonify ({'error' : 'token inválido'}), 401
 
 
 def recibir_mensajes(req):
