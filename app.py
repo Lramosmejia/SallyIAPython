@@ -42,7 +42,6 @@ def webhook():
         token = request.args.get('hub.verify_token')
         challenge = request.args.get('hub.challenge')
 
-        # VALIDACIÓN DE META
         if mode == 'subscribe' and token and token.strip() == TOKEN_SALLY:
             return Response(challenge, status=200, mimetype='text/plain')
         else:
@@ -51,10 +50,17 @@ def webhook():
     elif request.method == 'POST':
         data = request.get_json()
 
-        # Guardar mensajes en BD
-        agregar_mensajes_log(str(data))
+        try:
+            mensaje = data['entry'][0]['changes'][0]['value']['messages'][0]['text']['body']
+            numero = data['entry'][0]['changes'][0]['value']['messages'][0]['from']
+
+            agregar_mensajes_log(f"{numero}: {mensaje}")
+
+        except Exception as e:
+            print("Error procesando mensaje:", e)
 
         return Response('EVENT_RECEIVED', status=200)
+
 
 # Guardar mensajes
 def agregar_mensajes_log(texto):
