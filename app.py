@@ -95,14 +95,14 @@ def webhook():
 # =========================
 def enviar_mensajes_whatsapp(numero, mensaje_recibido):
 
-    # 🔹 Lógica de respuesta
+    # Lógica de respuesta
     if "hola" in mensaje_recibido.lower():
         respuesta = "¡Hola! mi nombre es Sally, soy tu chatbot universitario, ¿en qué puedo ayudarte?"
     else:
         respuesta = "No entendí tu mensaje, pero puedo ayudarte"
 
     # CONFIGURACIÓN (puedes ocultar luego)
-    ACCESS_TOKEN = "EAAfOFtLFLgABRH7YgDg23z5nTusGt0AGLOfyRu0bsr4cNWDAky05ZBN71pAmgwKyDmlIpaXW8EofKV2pZC8AaZASuZCBrOWRsWD3m50a0JQLuKqZCmZBh3qtpSI6hzs34YfZAW4ZBVnmneOckVGxDfrGIu0KeMQl16YAF4ZCIeBYzZBs55vO2Dk79tFqLYzXA25ezG9jsfKoJg08xDxWzZBLaGH4BchRIoqCXi8JiHaqKFgvo6BxEBdXbztCH38LnfvwlhbHTFxEFOkNHURsnSOQPg9mZCaaeQZDZD"
+    ACCESS_TOKEN = "EAAfOFtLFLgABRCrRf6jhWHojIR0mb2WHtyYCR2l7QOkiCNZCEnSNVWRc0ZCTm1i5rJ3PggDmUOBavwf0CqJSch0EZCpZCpa0PTZAuvVorOkJM2mX8o3ZAQWiGyKBCXR9hPiv6R2blPvQk0QYFa5phSyU6eeFvCGd00YegLft8IavkA7xSfXfKhsKiElm6qilnCLvEeJZBiZAZCLokhZCHthoYATQZCZC6ZC5YW7M8WSHVOZCZCBgZB9xWY8rX6vsKGEBpk6h4OQSRurO119Ns92yZBDHuWKpKmdwr"
     PHONE_NUMBER_ID = "997842246750668"
 
     
