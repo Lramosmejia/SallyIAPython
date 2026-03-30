@@ -41,10 +41,10 @@ def webhook_verify():
     token_esperado = current_app.config.get('TOKEN_VERIFICACION', 'SALLY')
 
     if mode == 'subscribe' and token == token_esperado:
-        print(f"[Webhook] Verificación exitosa ✅")
+        print(f"[Webhook] Verificación exitosa ")
         return Response(challenge, status=200, mimetype='text/plain')
 
-    print(f"[Webhook] Verificación FALLIDA ❌ — token recibido: '{token}'")
+    print(f"[Webhook] Verificación FALLIDA  — token recibido: '{token}'")
     return Response('Forbidden', status=403, mimetype='text/plain')
 
 

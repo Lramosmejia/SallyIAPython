@@ -1,7 +1,7 @@
 from flask import Flask
 from .extensions import db
 from .config.settings import Config
- 
+from .controllers.webhook_controller import webhook_bp
 
 def create_app(config_class=Config) -> Flask:
 
@@ -15,11 +15,10 @@ def create_app(config_class=Config) -> Flask:
     db.init_app(app)
 
     # ── Registrar Blueprints (Controllers) ───────────────────────────────────
-    from .controllers.webhook_controller import webhook_bp
     app.register_blueprint(webhook_bp)
 
     # ── Crear tablas en la BD ─────────────────────────────────────────────────
     with app.app_context():
         db.create_all()
-
+        print("base de datos creada con exito")
     return app

@@ -19,7 +19,7 @@ class Log(db.Model):
         return f"<Log #{self.id} [{self.fecha_y_hora}]: {preview}>"
 
     def to_dict(self) -> dict:
-        """Serialización básica para APIs futuras."""
+        
         return {
             'id':           self.id,
             'fecha_y_hora': self.fecha_y_hora.isoformat() if self.fecha_y_hora else None,
