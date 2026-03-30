@@ -46,7 +46,7 @@
 
             <tbody>
                 {% if registros %}
-                    {% for r registros %}
+                    {% for r in registros %}
                     <tr>
                         <td class="td-date">
                             {{r.fecha_y_hora.strftime('%Y-%m-%d %H:%M:%S') if r.fecha_y_hora else '—'}}
