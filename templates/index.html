@@ -1,75 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/styles/style.css">
     <title>Sally IA - Monitor de mensajes</title>
 </head>
+
 <body>
     <!-- encabezado de la página -->
     <header>
-        <h1> Sally IA</h1>
-        <span class="badge"> WhatsApp monitor de mensajes</span>
+        <h1>Sally IA</h1>
+        <span class="badge">WhatsApp Monitor</span>
     </header>
 
     <div class="stats">
         <div class="stat-card">
             <div class="label">Mensajes registrados</div>
-            <div class="values">{{registros | length }}</div>
+            <div class="value">{{ registros | length }}</div>
         </div>
         {% if registros %}
-
         <div class="stat-card">
             <div class="label">Último mensaje</div>
-            <div class="value">{{registros[0].fecha_y_hora.strftime('%d/%m %H:%M') if registros[0].fecha_y_hora else '—'}}</div>
+            <div class="value" style="font-size:13px; padding-top:6px; color:#555">
+                {{ registros[0].fecha_y_hora.strftime('%d/%m %H:%M') if registros[0].fecha_y_hora else '—' }}
+            </div>
         </div>
         {% endif %}
     </div>
 
     <div class="table-wrap">
-
         <div class="table-header">
             <h2>Log de mensajes recibidos</h2>
-            <a href="/" class="refresh-btn">Actualizar</a>
+            <a href="/" class="refresh-btn">↻ Actualizar</a>
         </div>
 
         <table>
-
             <thead>
                 <tr>
-                    <th>Fecha y Hora</th>
+                    <th>Fecha y hora (UTC)</th>
                     <th>Número</th>
-                    <th>Mensajes</th>
+                    <th>Mensaje</th>
                 </tr>
             </thead>
-
             <tbody>
                 {% if registros %}
-                    {% for r in registros %}
-                    <tr>
-                        <td class="td-date">
-                            {{r.fecha_y_hora.strftime('%Y-%m-%d %H:%M:%S') if r.fecha_y_hora else '—'}}
-                        </td>
-                        {% if ': ' in r.texto %}
-                            <td class="td-number"> {{ r.texto.split(': ', 1)[0] }}</td>
-                            <td class="td-msg">{{ r.texto.split(': ', 1)[1] }}</td>
-                        {% endfi %}
-                    </tr>
-                    {% endfor %}
+                {% for r in registros %}
+                <tr>
+                    <td class="td-date">
+                        {{ r.fecha_y_hora.strftime('%Y-%m-%d %H:%M:%S') if r.fecha_y_hora else '—' }}
+                    </td>
+                    {% if ': ' in r.texto %}
+                    <td class="td-number">{{ r.texto.split(': ', 1)[0] }}</td>
+                    <td class="td-msg">{{ r.texto.split(': ', 1)[1] }}</td>
+                    {% else %}
+                    <td class="td-number">—</td>
+                    <td class="td-msg">{{ r.texto }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
                 {% else %}
-
                 <tr>
                     <td colspan="3" class="empty">
-                        <span>...</span>
-                        Aún no hay mensajes registrados. <br>
-                        El log se actualizará cada vez que reciba un mensaje
+                        <span>💬</span>
+                        Aún no hay mensajes registrados.<br>
+                        El log aparecerá aquí cuando lleguen mensajes al webhook.
                     </td>
                 </tr>
-                {% endif%}
+                {% endif %}
             </tbody>
         </table>
-
     </div>
+
 </body>
+
 </html>
