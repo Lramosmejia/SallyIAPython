@@ -5,34 +5,34 @@ from ..strategies.registry import StrategyRegistry
 
 RESPUESTAS: dict[str, str] = {
     "matriculas": (
-        "📚 *Información de Matrículas*\n\n"
+        "*Información de Matrículas*\n\n"
         "• Fechas de inscripción: 1-15 de cada mes\n"
         "• Costo por crédito: consulta en caja\n"
         "• Requisitos: paz y salvo + carné vigente\n\n"
-        "🌐 Más info: www.universidad.edu/matriculas"
+        " Más info: www.universidad.edu/matriculas"
     ),
     "horarios": (
-        "🕒 *Consulta de Horarios*\n\n"
+        "*Consulta de Horarios*\n\n"
         "Ingresa al portal estudiantil para ver tu horario personalizado:\n"
-        "🌐 www.universidad.edu/horarios\n\n"
+        "www.universidad.edu/horarios\n\n"
         "Usuario: tu número de documento\n"
         "Clave: fecha de nacimiento (DDMMAAAA)"
     ),
     "soporte": (
         "🛠 *Soporte Técnico*\n\n"
-        "📧 soporte@universidad.edu\n"
-        "📞 (601) 123-4567 ext. 200\n"
-        "🕒 Lunes a Viernes: 8:00am - 5:00pm\n\n"
+        "soporte@universidad.edu\n"
+        "(601) 123-4567 ext. 200\n"
+        "Lunes a Viernes: 8:00am - 5:00pm\n\n"
         "También puedes abrir un ticket en:\n"
-        "🌐 soporte.universidad.edu"
+        "soporte.universidad.edu"
     ),
 }
 
-# Botones del menú principal (máximo 3 por restricción de Meta)
+# Botones del menú principal 
 MENU_BOTONES: list[dict] = [
-    {"id": "matriculas", "title": "📚 Matrículas"},
-    {"id": "horarios",   "title": "🕒 Horarios"},
-    {"id": "soporte",    "title": "🛠 Soporte"},
+    {"id": "matriculas", "title": " Matrículas"},
+    {"id": "horarios",   "title": " Horarios"},
+    {"id": "soporte",    "title": " Soporte"},
 ]
 
 # Palabras clave que activan el menú principal
@@ -82,7 +82,7 @@ class MessageService:
                 self.adapter.enviar_botones(
                     numero=numero,
                     cuerpo=(
-                        "👋 ¡Hola! Soy *Sally*, tu asistente universitaria.\n"
+                        " ¡Hola! Soy *Sally*, tu asistente universitaria.\n"
                         "¿En qué puedo ayudarte hoy?"
                     ),
                     botones=MENU_BOTONES,
@@ -95,7 +95,7 @@ class MessageService:
                 self.adapter.enviar_texto(
                     numero,
                     (
-                        "❓ No entendí tu mensaje.\n\n"
+                        " No entendí tu mensaje.\n\n"
                         "Escribe *menu* o *hola* para ver las opciones disponibles."
                     )
                 )

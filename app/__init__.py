@@ -7,17 +7,18 @@ def create_app(config_class=Config) -> Flask:
 
     app = Flask(
         __name__,
-        template_folder='../templates'   # apunta a /templates en la raíz
+         # apunta a /templates en la raíz
+        template_folder='../templates'  
     )
     app.config.from_object(config_class)
 
-    # ── Inicializar extensiones ───────────────────────────────────────────────
+    # ── Inicializar extensiones 
     db.init_app(app)
 
-    # ── Registrar Blueprints (Controllers) ───────────────────────────────────
+    # ── Registrar Blueprints (Controllers) 
     app.register_blueprint(webhook_bp)
 
-    # ── Crear tablas en la BD ─────────────────────────────────────────────────
+    # ── Crear tablas en la BD 
     with app.app_context():
         db.create_all()
         print("base de datos creada con exito")

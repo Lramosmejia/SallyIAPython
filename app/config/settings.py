@@ -14,7 +14,7 @@ class Config:
 
     WHATSAPP_PHONE_NUMBER_ID = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', '')
 
-    WHATSAPP_API_URL = 'https://graph.facebook.com/v22.0'
+    WHATSAPP_API_URL = 'https://graph.facebook.com/v25.0'
 
     SECRET_KEY = os.environ.get('SECRET_KEY', 'sally-secret-key-change-in-prod')
 
