@@ -63,8 +63,8 @@ def webhook_receive():
     data = request.get_json(silent=True)
 
     if data:
-        _get_chatbot_service().procesar_mensaje(data)
-        _get_service().procesar_webhook(data)
+        respuesta_chatbot = _get_chatbot_service().procesar_mensaje(data)
+        _get_service().procesar_webhook(data, respuesta_externa=respuesta_chatbot)
 
     # Meta requiere HTTP 200 con el texto exacto 'EVENT_RECEIVED'
     return Response('EVENT_RECEIVED', status=200, mimetype='text/plain')

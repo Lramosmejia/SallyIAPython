@@ -50,7 +50,7 @@ class MessageService:
         self.adapter    = WhatsAppAdapter()
         self.registry   = StrategyRegistry()
 
-    def procesar_webhook(self, data: dict) -> None:
+    def procesar_webhook(self, data: dict, respuesta_externa: str | None) -> None:
 
         try:
             # Extraer el mensaje del payload de Meta (estructura fija)
@@ -67,6 +67,10 @@ class MessageService:
             self.repository.guardar(f"{numero}: {contenido}")
 
             # Generar respuesta
+            if respuesta_externa is not None:
+                self.adapter.enviar_texto(numero, respuesta_externa)
+                return
+            
             self._responder(numero, contenido)
 
         except (KeyError, IndexError) as e:
