@@ -2,6 +2,7 @@ from flask import Flask
 from .extensions import db
 from .config.settings import Config
 from .controllers.webhook_controller import webhook_bp
+from .seeds import seed_estudiantes
 
 def create_app(config_class=Config) -> Flask:
 
@@ -22,4 +23,5 @@ def create_app(config_class=Config) -> Flask:
     with app.app_context():
         db.create_all()
         print("base de datos creada con exito")
+        seed_estudiantes()
     return app

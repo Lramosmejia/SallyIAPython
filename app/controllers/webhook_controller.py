@@ -1,13 +1,15 @@
 from flask import Blueprint, request, Response, render_template, current_app
 from ..services.message_service import MessageService
+from ..services.chatbot_service import ChatbotService
 from ..repositories.log_repository import LogRepository
 
 
 webhook_bp = Blueprint('webhook', __name__)
 
 # Instancias creadas una sola vez por proceso (patrón lazy singleton)
-_service:    MessageService  | None = None
-_repository: LogRepository   | None = None
+_service:         MessageService  | None = None
+_repository:      LogRepository   | None = None
+_chatbot_service: ChatbotService  | None = None
 
 
 def _get_service() -> MessageService:
@@ -22,6 +24,13 @@ def _get_repository() -> LogRepository:
     if _repository is None:
         _repository = LogRepository()
     return _repository
+
+
+def _get_chatbot_service() -> ChatbotService:
+    global _chatbot_service
+    if _chatbot_service is None:
+        _chatbot_service = ChatbotService()
+    return _chatbot_service
 
 
 @webhook_bp.route('/')
@@ -54,6 +63,7 @@ def webhook_receive():
     data = request.get_json(silent=True)
 
     if data:
+        _get_chatbot_service().procesar_mensaje(data)
         _get_service().procesar_webhook(data)
 
     # Meta requiere HTTP 200 con el texto exacto 'EVENT_RECEIVED'
