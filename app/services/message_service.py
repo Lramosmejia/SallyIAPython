@@ -1,108 +1,97 @@
+
+from __future__ import annotations
+
 from ..repositories.log_repository import LogRepository
 from ..integrations.whatsapp_adapter import WhatsAppAdapter
 from ..strategies.registry import StrategyRegistry
 
-
-RESPUESTAS: dict[str, str] = {
-    "matriculas": (
-        "*Información de Matrículas*\n\n"
-        "• Fechas de inscripción: 1-15 de cada mes\n"
-        "• Costo por crédito: consulta en caja\n"
-        "• Requisitos: paz y salvo + carné vigente\n\n"
-        " Más info: www.universidad.edu/matriculas"
-    ),
-    "horarios": (
-        "*Consulta de Horarios*\n\n"
-        "Ingresa al portal estudiantil para ver tu horario personalizado:\n"
-        "www.universidad.edu/horarios\n\n"
-        "Usuario: tu número de documento\n"
-        "Clave: fecha de nacimiento (DDMMAAAA)"
-    ),
-    "soporte": (
-        "🛠 *Soporte Técnico*\n\n"
-        "soporte@universidad.edu\n"
-        "(601) 123-4567 ext. 200\n"
-        "Lunes a Viernes: 8:00am - 5:00pm\n\n"
-        "También puedes abrir un ticket en:\n"
-        "soporte.universidad.edu"
-    ),
-}
-
-# Botones del menú principal 
-MENU_BOTONES: list[dict] = [
-    {"id": "matriculas", "title": " Matrículas"},
-    {"id": "horarios",   "title": " Horarios"},
-    {"id": "soporte",    "title": " Soporte"},
-]
-
-# Palabras clave que activan el menú principal
-PALABRAS_MENU: frozenset[str] = frozenset({
-    "hola", "menu", "menú", "inicio", "start",
-    "ayuda", "help", "opciones", "hi", "hello",
-})
+# Palabras de fallback (cuando chatbot retorna None y el contenido es desconocido)
+MENSAJE_FALLBACK = (
+    "No entendi tu mensaje.\n\n"
+    "Escribe *hola* o *menu* para ver las opciones disponibles."
+)
 
 
 class MessageService:
 
-
-    def __init__(self):
+    def __init__(self) -> None:
         self.repository = LogRepository()
         self.adapter    = WhatsAppAdapter()
         self.registry   = StrategyRegistry()
 
-    def procesar_webhook(self, data: dict, respuesta_externa: str | None) -> None:
+    # -------------------------------------------------------------------------
+    # PUNTO DE ENTRADA
+    # -------------------------------------------------------------------------
+
+    def procesar_webhook(
+        self,
+        data: dict,
+        respuesta_externa: list[dict] | None = None,
+    ) -> None:
 
         try:
-            # Extraer el mensaje del payload de Meta (estructura fija)
-            entry  = data['entry'][0]['changes'][0]['value']
-            msg    = entry['messages'][0]
-            numero = msg['from']
-            tipo   = msg.get('type', 'unknown')
+            entry     = data["entry"][0]["changes"][0]["value"]
+            msg       = entry["messages"][0]
+            numero    = msg["from"]
+            tipo      = msg.get("type", "unknown")
 
-            # Resolver strategy y extraer contenido
             strategy  = self.registry.resolver(tipo)
-            contenido = strategy.extraer_contenido(msg) if strategy else 'no_soportado'
+            contenido = strategy.extraer_contenido(msg) if strategy else "no_soportado"
 
-            # Log en BD
+            # Log siempre — independientemente de quien responda
             self.repository.guardar(f"{numero}: {contenido}")
 
-            # Generar respuesta
+            # Despachar respuesta
             if respuesta_externa is not None:
-                self.adapter.enviar_texto(numero, respuesta_externa)
-                return
-            
-            self._responder(numero, contenido)
+                self._enviar_lista(numero, respuesta_externa)
+            else:
+                self._fallback(numero)
 
         except (KeyError, IndexError) as e:
-            # Payload inesperado (notificación de estado, mensajes de sistema, etc.)
-            print(f"[MessageService] Payload no procesable (puede ser status update): {e}")
+            print(f"[MessageService] Payload no procesable (status update?): {e}")
         except Exception as e:
             print(f"[MessageService] Error inesperado: {e}")
 
-    def _responder(self, numero: str, contenido: str) -> None:
+    # -------------------------------------------------------------------------
+    # ENVIO DE RESPUESTAS
+    # -------------------------------------------------------------------------
 
+    def _enviar_lista(self, numero: str, mensajes: list[dict]) -> None:
+        """Itera y envía cada mensaje de la lista usando el adaptador correcto."""
+        for msg in mensajes:
+            try:
+                self._enviar_uno(numero, msg)
+            except Exception as e:
+                print(f"[MessageService] Error al enviar mensaje a {numero}: {e}")
+
+    def _enviar_uno(self, numero: str, msg: dict) -> None:
+        """Despacha un dict de mensaje al metodo correcto del adaptador."""
+        tipo = msg.get("type")
+
+        if tipo == "text":
+            self.adapter.enviar_texto(numero, msg["body"])
+
+        elif tipo == "buttons":
+            self.adapter.enviar_botones(
+                numero=numero,
+                cuerpo=msg["body"],
+                botones=msg["buttons"],
+            )
+
+        elif tipo == "list":
+            self.adapter.enviar_lista(
+                numero=numero,
+                cuerpo=msg["body"],
+                boton_texto=msg.get("button_text", "Ver opciones"),
+                secciones=msg["sections"],
+            )
+
+        else:
+            print(f"[MessageService] Tipo de mensaje desconocido: {tipo!r}")
+
+    def _fallback(self, numero: str) -> None:
+        """Respuesta cuando ChatbotService no reconocio el contenido."""
         try:
-            if contenido in PALABRAS_MENU:
-                self.adapter.enviar_botones(
-                    numero=numero,
-                    cuerpo=(
-                        " ¡Hola! Soy *Sally*, tu asistente universitaria.\n"
-                        "¿En qué puedo ayudarte hoy?"
-                    ),
-                    botones=MENU_BOTONES,
-                )
-
-            elif contenido in RESPUESTAS:
-                self.adapter.enviar_texto(numero, RESPUESTAS[contenido])
-
-            else:
-                self.adapter.enviar_texto(
-                    numero,
-                    (
-                        " No entendí tu mensaje.\n\n"
-                        "Escribe *menu* o *hola* para ver las opciones disponibles."
-                    )
-                )
-
+            self.adapter.enviar_texto(numero, MENSAJE_FALLBACK)
         except Exception as e:
-            print(f"[MessageService] Error al enviar respuesta a {numero}: {e}")
+            print(f"[MessageService] Error en fallback a {numero}: {e}")

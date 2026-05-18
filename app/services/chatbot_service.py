@@ -1,24 +1,34 @@
+from __future__ import annotations
+
 from ..services.estudiante_service import EstudianteService
-
-# ── Estado en memoria por usuario ─────────────────────────────────────────────
-# Clave: numero de WhatsApp  |  Valor: estado actual de la conversacion
-_estados_usuarios: dict[str, str] = {}
-
-# Palabras que inician el flujo de consulta de estudiante
-PALABRAS_CONSULTA: frozenset[str] = frozenset({"estado", "consultar"})
+from ..state.conversation_state import conversation_state
+from ..flows.conversation_flow import (
+    TRIGGERS_MENU_PRINCIPAL,
+    TRIGGERS_ESTADO_ACADEMICO,
+    MAIN_MENU,
+    SUBMENUS,
+    CONTENT,
+    FOLLOW_UP,
+    ENCUESTA,
+    ENCUESTA_RESPUESTAS,
+    SUBMENU_IDS,
+    CONTENT_IDS,
+    ENCUESTA_IDS,
+)
 
 
 class ChatbotService:
     """Orquesta el flujo conversacional del chatbot."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.estudiante_service = EstudianteService()
+        self.state = conversation_state
 
     # ─────────────────────────────────────────────────────────────────────────
     # MÉTODO PRINCIPAL
     # ─────────────────────────────────────────────────────────────────────────
 
-    def procesar_mensaje(self, data: dict) -> str | None:
+    def procesar_mensaje(self, data: dict) -> list[dict] | None:
         """
         Extrae número, tipo y contenido del payload de Meta,
         aplica el flujo conversacional y retorna la respuesta como texto,
@@ -29,10 +39,11 @@ class ChatbotService:
             msg    = entry['messages'][0]
             numero = msg['from']
             tipo   = msg.get('type', 'unknown')
-
             contenido = self._extraer_contenido(tipo, msg)
+            
+            print(f"[ChatbotService] {numero} | estado= {self.state.get_state(numero)} | contenido= {contenido!r}")
 
-            return self._flujo(numero, contenido)
+            return self._resolver_flujo(numero, contenido)
 
         except (KeyError, IndexError):
             return None
@@ -44,77 +55,121 @@ class ChatbotService:
     def _extraer_contenido(self, tipo: str, msg: dict) -> str:
         """Soporta mensajes de texto, button_reply y list_reply."""
 
-        if tipo == 'text':
-            return msg.get('text', {}).get('body', '').lower().strip()
+        if tipo == "text":
+            return msg.get("text", {}).get("body", "").lower().strip()
 
-        if tipo == 'interactive':
-            interactive = msg.get('interactive', {})
+        if tipo == "interactive":
+            interactive = msg.get("interactive", {})
 
-            if 'button_reply' in interactive:
-                return interactive['button_reply'].get('id', '').lower().strip()
+            if "button_reply" in interactive:
+                return interactive["button_reply"].get("id", "").lower().strip()
 
-            if 'list_reply' in interactive:
-                return interactive['list_reply'].get('id', '').lower().strip()
+            if "list_reply" in interactive:
+                return interactive["list_reply"].get("id", "").lower().strip()
 
-        return 'no_soportado'
+        return "no_soportado"
 
     # ─────────────────────────────────────────────────────────────────────────
     # FLUJO CONVERSACIONAL
     # ─────────────────────────────────────────────────────────────────────────
 
-    def _flujo(self, numero: str, contenido: str) -> str:
+    def _resolver_flujo(self, numero: str, contenido: str) -> list[dict] | None:
 
-        estado_actual = _estados_usuarios.get(numero, 'menu')
+        estado_actual = self.state.get_state(numero)
 
-        # ── El usuario está esperando que se le pida su identificación ────────
-        if estado_actual == 'esperando_identificacion':
-            return self._validar_identificacion(numero, contenido)
+        #1. Estados especiales de prioridad
+        if estado_actual == "esperando_identificacion":
+            return self._flujo_identificacion(numero, contenido)
 
-        # ── El usuario pide consultar su estado académico ─────────────────────
-        if contenido in PALABRAS_CONSULTA:
-            _estados_usuarios[numero] = 'esperando_identificacion'
+        #2. Triggers del menú principal
+        if contenido in TRIGGERS_MENU_PRINCIPAL:
+            self.state.set_state(numero, "in_main_menu")
             return (
-                "Por favor ingresa tu *número de identificación*.\n\n"
-                "⚠️ Sin puntos ni espacios. Ejemplo: *1234567890*"
+                [MAIN_MENU]
             )
+        #3. Trigger de estado academico
+        if contenido in TRIGGERS_ESTADO_ACADEMICO:
+            self.state.set_state(numero, "esperando_identificacion")
+            return [{
+                "type": "text",
+                "body":("Por favor ingresa tu *numero de identificación*.\n\n" 
+                "Sin puntos ni espacios. Ejemplo: *1234567890*"),
+            }]
+        #4. Navegacion a ssubmenu
+        if contenido in SUBMENU_IDS:
+            self.state.set_state(numero, f"in_{contenido}")
+            return [SUBMENUS[contenido]]
+        
+        #5. Respuestas a opciones esoecificas de submenu
+        if contenido in CONTENT_IDS:
+            self.state.set_state(numero, "in_followup")
+            return[{
+                "type": "text", "body": CONTENT[contenido]},
+                FOLLOW_UP]
+        
+        # 6. Acciones del follow-up
+        if contenido == "hablar_asesor":
+            self.state.set_state(numero, "in_followup")
+            return [
+                {"type": "text", "body": CONTENT["hablar_asesor"]},
+                FOLLOW_UP,
+            ]
 
-        # ── Contenido no reconocido en este servicio ──────────────────────────
-        return None  # El caller puede delegar a MessageService
+        if contenido == "finalizar":
+            self.state.set_state(numero, "in_encuesta")
+            return [ENCUESTA]
+
+        # 7. Respuestas de la encuesta
+        if contenido in ENCUESTA_IDS:
+            self.state.reset(numero)
+            return [{"type": "text", "body": ENCUESTA_RESPUESTAS[contenido]}]   
+        
+        #8. Respuesta por defecto    
+        return None  
 
     # ─────────────────────────────────────────────────────────────────────────
     # VALIDACIÓN DE IDENTIFICACIÓN Y RESPUESTA CON DATOS DEL ESTUDIANTE
     # ─────────────────────────────────────────────────────────────────────────
 
-    def _validar_identificacion(self, numero: str, identificacion: str) -> str:
-
-        # Resetear estado sin importar el resultado
-        _estados_usuarios[numero] = 'menu'
+    def _flujo_identificacion(self, numero: str, identificacion: str) -> list[dict]:
+        self.state.set_state(numero, "in_followup")
 
         estudiante = self.estudiante_service.validar_estudiante(identificacion)
 
         if not estudiante:
-            return (
-                "❌ No encontré ningún estudiante con la identificación "
-                f"*{identificacion}*.\n\n"
-                "Verifica el número e intenta de nuevo escribiendo *consultar*."
-            )
+            return [
+                {
+                    "type": "text",
+                    "body": (
+                        f"No encontre ningun estudiante con la identificacion "
+                        f"*{identificacion}*.\n\nVerifica el numero e intentalo de nuevo."
+                    ),
+                },
+                FOLLOW_UP,
+            ]
 
-        return (
-            f"✅ *Información académica de {estudiante.nombre}*\n\n"
-            f"📋 *Estado académico:* {estudiante.estado_academico or 'No disponible'}\n"
-            f"📚 *Semestre:* {estudiante.semestre or 'No disponible'}\n\n"
-            f"🕐 *Horario:*\n{estudiante.horario or 'No disponible'}\n\n"
-            f"👨‍🏫 *Docentes:*\n{estudiante.docentes or 'No disponible'}"
-        )
+        return [
+            {
+                "type": "text",
+                "body": (
+                    f"Informacion Academica\n\n"
+                    f"Estudiante: {estudiante.nombre}\n"
+                    f"ID: {estudiante.numero_identificacion}\n\n"
+                    f"Estado academico: {estudiante.estado_academico or 'No disponible'}\n"
+                    f"Semestre: {estudiante.semestre or 'No disponible'}\n\n"
+                    f"Horario:\n{estudiante.horario or 'No disponible'}\n\n"
+                    f"Docentes:\n{estudiante.docentes or 'No disponible'}"
+                ),
+            },
+            FOLLOW_UP,
+        ]
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # UTILIDADES DE ESTADO
-    # ─────────────────────────────────────────────────────────────────────────
+    # -------------------------------------------------------------------------
+    # UTILIDADES PUBLICAS
+    # -------------------------------------------------------------------------
 
     def obtener_estado(self, numero: str) -> str:
-        """Retorna el estado actual de la conversación de un usuario."""
-        return _estados_usuarios.get(numero, 'menu')
+        return self.state.get_state(numero)
 
     def resetear_estado(self, numero: str) -> None:
-        """Fuerza el estado de un usuario a 'menu'."""
-        _estados_usuarios[numero] = 'menu'
+        self.state.reset(numero)

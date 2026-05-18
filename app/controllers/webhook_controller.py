@@ -35,7 +35,7 @@ def _get_chatbot_service() -> ChatbotService:
 
 @webhook_bp.route('/')
 def index():
-
+    # mostrar los últimos 100 registros de mensajes procesados en la página principal
     registros = _get_repository().listar_recientes(limite=100)
     return render_template('index.html', registros=registros)
 
