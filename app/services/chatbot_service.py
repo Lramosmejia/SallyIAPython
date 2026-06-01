@@ -77,17 +77,26 @@ class ChatbotService:
 
         estado_actual = self.state.get_state(numero)
 
-        #1. Estados especiales de prioridad
-        if estado_actual == "esperando_identificacion":
-            return self._flujo_identificacion(numero, contenido)
-
-        #2. Triggers del menú principal
+        #1. Triggers del menú principal — SIEMPRE tienen prioridad
         if contenido in TRIGGERS_MENU_PRINCIPAL:
             self.state.set_state(numero, "in_main_menu")
             return (
                 [MAIN_MENU]
             )
-        #3. Trigger de estado academico
+
+        #2. Navegacion a submenú — prioridad sobre estados especiales
+        if contenido in SUBMENU_IDS:
+            self.state.set_state(numero, f"in_{contenido}")
+            return [SUBMENUS[contenido]]
+
+        #3. Respuestas a opciones específicas de submenú
+        if contenido in CONTENT_IDS:
+            self.state.set_state(numero, "in_followup")
+            return[{
+                "type": "text", "body": CONTENT[contenido]},
+                FOLLOW_UP]
+
+        #4. Trigger de estado académico
         if contenido in TRIGGERS_ESTADO_ACADEMICO:
             self.state.set_state(numero, "esperando_identificacion")
             return [{
@@ -95,17 +104,10 @@ class ChatbotService:
                 "body":("Por favor ingresa tu *numero de identificación*.\n\n" 
                 "Sin puntos ni espacios. Ejemplo: *1234567890*"),
             }]
-        #4. Navegacion a ssubmenu
-        if contenido in SUBMENU_IDS:
-            self.state.set_state(numero, f"in_{contenido}")
-            return [SUBMENUS[contenido]]
-        
-        #5. Respuestas a opciones esoecificas de submenu
-        if contenido in CONTENT_IDS:
-            self.state.set_state(numero, "in_followup")
-            return[{
-                "type": "text", "body": CONTENT[contenido]},
-                FOLLOW_UP]
+
+        #5. Estado especial: esperando identificación (solo captura texto libre)
+        if estado_actual == "esperando_identificacion":
+            return self._flujo_identificacion(numero, contenido)
         
         # 6. Acciones del follow-up
         if contenido == "hablar_asesor":
