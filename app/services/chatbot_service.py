@@ -109,14 +109,7 @@ class ChatbotService:
         if estado_actual == "esperando_identificacion":
             return self._flujo_identificacion(numero, contenido)
         
-        # 6. Acciones del follow-up
-        if contenido == "hablar_asesor":
-            self.state.set_state(numero, "in_followup")
-            return [
-                {"type": "text", "body": CONTENT["hablar_asesor"]},
-                FOLLOW_UP,
-            ]
-
+        # 6. Finalizar → encuesta
         if contenido == "finalizar":
             self.state.set_state(numero, "in_encuesta")
             return [ENCUESTA]

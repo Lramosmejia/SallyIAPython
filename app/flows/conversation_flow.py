@@ -152,9 +152,9 @@ SUBMENUS: dict[str, dict] = {
         "type": "buttons",
         "body": "📄 *Certificados*\n\n¿Qué tipo de certificado necesitas?",
         "buttons": [
-            {"id": "cert_academico",  "title": "🎓 Certificado académico"},
-            {"id": "cert_notas",      "title": "📊 Certificado de notas"},
-            {"id": "cert_matricula",  "title": "📋 Certificado de matrícula"},
+            {"id": "cert_academico",  "title": "🎓 Cert. académico"},
+            {"id": "cert_notas",      "title": "📊 Cert. de notas"},
+            {"id": "cert_matricula",  "title": "📋 Cert. matrícula"},
         ],
     },
 
@@ -162,9 +162,9 @@ SUBMENUS: dict[str, dict] = {
         "type": "buttons",
         "body": "🛠️ *Soporte Técnico*\n\n¿Con qué necesitas ayuda?",
         "buttons": [
-            {"id": "sop_contrasena", "title": "🔑 Recuperar contraseña"},
-            {"id": "sop_acceso",     "title": "🚫 Problemas de acceso"},
-            {"id": "sop_ticket",     "title": "🎫 Abrir ticket técnico"},
+            {"id": "sop_contrasena", "title": "🔑 Olvidé clave"},
+            {"id": "sop_acceso",     "title": "🚫 Sin acceso"},
+            {"id": "sop_ticket",     "title": "🎫 Abrir ticket"},
         ],
     },
 
