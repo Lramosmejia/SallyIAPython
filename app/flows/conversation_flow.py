@@ -218,12 +218,12 @@ CONTENT: dict[str, str] = {
 
     # ── MATRÍCULAS ────────────────────────────────────────────────────────────
     "mat_fechas": (
-        "📅 *Fechas de Matrícula 2025*\n\n"
-        "🗓️ *Período 2025-1:* 15 Ene - 31 Ene\n"
-        "🗓️ *Período 2025-2:* 15 Jun - 31 Jun\n\n"
+        "📅 *Fechas de Matrícula 2026*\n\n"
+        "🗓️ *Período 2026-1:* 15 Ene - 31 Ene\n"
+        "🗓️ *Período 2026-2:* 15 Jun - 31 Jun\n\n"
         "⚠️ *Matrícula extemporánea:* primeros 5 días hábiles del período.\n\n"
         "📌 Realiza tu inscripción en:\n"
-        "*portal.universidad.edu > Matrículas*"
+        "*https://www.etitc.edu.co/es/ > Inscripciones*"
     ),
     "mat_costos": (
         "💰 *Costos por Crédito Académico*\n\n"
@@ -232,7 +232,7 @@ CONTENT: dict[str, str] = {
         "• Estrato 3-4: $180,000 por crédito\n"
         "• Estrato 5-6: $250,000 por crédito\n\n"
         "💳 *Métodos de pago:* PSE, efectivo, tarjeta débito/crédito.\n"
-        "🏦 Convenios bancarios disponibles en caja principal."
+        "🏦 Convenios bancarios disponibles Davivienda y Banco Caja Social."
     ),
     "mat_requisitos": (
         "📋 *Requisitos de Matrícula*\n\n"
@@ -243,17 +243,17 @@ CONTENT: dict[str, str] = {
         "✅ Foto actualizada en el sistema\n"
         "✅ Sin sanciones disciplinarias activas\n\n"
         "📍 Verificación presencial:\n"
-        "Oficina de Registro y Control, Bloque A"
+        "Oficina de Registro y Control, Sede Principal"
     ),
     "mat_asesor": (
         "👤 *Asesor de Matrículas*\n\n"
         "Nuestros asesores te atienden con gusto:\n\n"
         "📞 Teléfono: (601) 123-4567 ext. 101\n"
-        "✉️ Email: matriculas@universidad.edu\n"
+        "✉️ Email: admmisiones@itc.edu.co, apoyoadmisiones@itc.edu.co\n"
         "💬 Chat: portal.universidad.edu/chat\n"
         "🕐 Horario: Lun-Vie 8:00am - 5:00pm\n\n"
         "📍 Atención presencial:\n"
-        "Bloque A, Oficina 105"
+        "Sede Principal"
     ),
 
     # ── CERTIFICADOS ──────────────────────────────────────────────────────────
@@ -271,29 +271,29 @@ CONTENT: dict[str, str] = {
     "cert_notas": (
         "📊 *Certificado de Notas*\n\n"
         "⏱️ Disponible de inmediato (descarga digital)\n"
-        "💵 Costo: $10,000 (versión sellada)\n\n"
+        "💵 Costo: $17,000 (versión sellada)\n\n"
         "🌐 *Descarga gratuita en:*\n"
-        "portal.universidad.edu > Mis documentos\n\n"
+        "https://www.etitc.edu.co/es/ > Servicios > Certificados de estudio\n\n"
         "✅ El certificado digital tiene validez oficial.\n"
         "📄 Versión física sellada en Registro y Control."
     ),
     "cert_matricula": (
         "📋 *Certificado de Matrícula*\n\n"
         "⏱️ Disponible inmediatamente tras el pago\n"
-        "💵 Costo: $8,000\n\n"
+        "💵 Costo: $gratuito\n\n"
         "🌐 *Descárgalo en:*\n"
-        "portal.universidad.edu > Mis documentos\n\n"
+        "https://www.etitc.edu.co/es/ > Mis documentos\n\n"
         "✅ Válido para:\n"
-        "• EPS y sistemas de salud\n"
+        "• Actualizacion de datos en el trabajo\n"
         "• Entidades bancarias\n"
-        "• Trámites oficiales"
+        "• Trámites oficiales\n"
     ),
 
     # ── SOPORTE ───────────────────────────────────────────────────────────────
     "sop_contrasena": (
         "🔑 *Recuperar Contraseña del Portal*\n\n"
         "Sigue estos pasos:\n\n"
-        "1️⃣ Ve a *portal.universidad.edu*\n"
+        "1️⃣ Ve a *https://www.etitc.edu.co/es/ > Servicios > Campus Virtual*\n"
         "2️⃣ Clic en *¿Olvidaste tu contraseña?*\n"
         "3️⃣ Ingresa tu correo institucional\n"
         "4️⃣ Revisa tu bandeja (incluye carpeta spam)\n"
@@ -311,7 +311,7 @@ CONTENT: dict[str, str] = {
         "❗ *Cuenta suspendida*\n"
         "→ Verifica tu estado financiero\n\n"
         "📞 Soporte: (601) 123-4567 ext. 200\n"
-        "✉️ soporte@universidad.edu\n"
+        "✉️ soportefuncional@itc.edu.co\n"
         "🕐 Lun-Vie 8:00am - 6:00pm"
     ),
     "sop_ticket": (
@@ -331,7 +331,7 @@ CONTENT: dict[str, str] = {
         "📌 *Petición*\n\n"
         "Una petición es una solicitud respetuosa de información, documentos o acciones específicas.\n\n"
         "📝 *Cómo radicarla:*\n"
-        "• Portal: portal.universidad.edu > PQRS\n"
+        "• Portal: https://www.etitc.edu.co/es/ > Servicios > PQRS\n"
         "• Presencial: Bloque B, Oficina de Atención al Ciudadano\n"
         "• Email: pqrs@universidad.edu\n\n"
         "⏱️ Tiempo de respuesta: *15 días hábiles*\n"
@@ -341,7 +341,7 @@ CONTENT: dict[str, str] = {
         "😤 *Queja*\n\n"
         "Una queja expresa inconformidad con la prestación de un servicio.\n\n"
         "📝 *Cómo radicarla:*\n"
-        "• Portal: portal.universidad.edu > PQRS\n"
+        "• Portal: https://www.etitc.edu.co/es/ > Servicios > PQRS\n"
         "• Presencial: Bloque B, Oficina de Atención\n"
         "• Email: pqrs@universidad.edu\n\n"
         "⏱️ Tiempo de respuesta: *15 días hábiles*\n\n"
@@ -352,7 +352,7 @@ CONTENT: dict[str, str] = {
         "Un reclamo exige el reconocimiento o corrección de un derecho vulnerado.\n\n"
         "📝 *Para radicarlo:*\n"
         "1️⃣ Reúne evidencias y documentos de soporte\n"
-        "2️⃣ Portal: portal.universidad.edu > PQRS\n"
+        "2️⃣ Portal: https://www.etitc.edu.co/es/ > Servicios > PQRS\n"
         "3️⃣ O acude al Defensor Estudiantil\n\n"
         "📞 Defensor Estudiantil: (601) 123-4567 ext. 305\n"
         "⏱️ Respuesta: *15 días hábiles*"
@@ -373,20 +373,17 @@ CONTENT: dict[str, str] = {
     "hor_consultar": (
         "🔍 *Consultar tu Horario*\n\n"
         "Accede a tu horario personalizado:\n\n"
-        "🌐 *portal.universidad.edu > Mi Horario*\n\n"
-        "👤 Usuario: número de documento\n"
-        "🔑 Clave: fecha de nacimiento (DDMMAAAA)\n\n"
-        "📱 También disponible en la *App Universitaria*\n"
-        "→ Descárgala en Play Store o App Store."
+        "🌐 *https://www.etitc.edu.co/es/ > Servicios > Academusoft > Mi Horario*\n\n"
+        "👤 Usuario: registrado\n"
+        "🔑 Clave: la registrada en  la plataforma\n\n"
     ),
     "hor_descargar": (
         "📥 *Descargar Horario en PDF*\n\n"
         "Sigue estos pasos:\n\n"
-        "1️⃣ Ingresa a *portal.universidad.edu*\n"
+        "1️⃣ Ingresa a *https://www.etitc.edu.co/es/ > Servicios > Academusoft > Mi Horario*\n"
         "2️⃣ Ve a la sección *Mi Horario*\n"
         "3️⃣ Clic en el botón *📄 Descargar PDF*\n"
         "4️⃣ El archivo se descarga automáticamente\n\n"
-        "📱 Desde la app: Horario > Exportar > PDF\n\n"
         "✅ El PDF es válido como horario oficial certificado."
     ),
     "hor_problema": (
